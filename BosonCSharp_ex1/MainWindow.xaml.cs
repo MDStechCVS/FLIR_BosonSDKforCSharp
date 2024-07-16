@@ -42,20 +42,7 @@ namespace BosonCSharp_ex1
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            try {
-                is_initCam = InitCamera();
-                is_initTimer = InitTimer(10);
-
-                if (is_initTimer && is_initCam)
-                {
-                    timer.Start();
-                }
-            }
-            catch(Exception ex)
-            {
-                Debug.WriteLine("Window_Loaded : " + ex); 
-            }
-          
+         
         }
 
         private bool InitTimer(double intervalMs)
@@ -125,22 +112,13 @@ namespace BosonCSharp_ex1
                     // Mat를 Bitmap으로 변환 
                     Bitmap bitmap = BitmapConverter.ToBitmap(colorMat);
 
-                    // Draw rectangle and temperature data on the Bitmap
-                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    value.Dispatcher.Invoke(() =>
                     {
-                        using (System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.Red, 3))
-                        {
-                            graphics.DrawRectangle(pen, new System.Drawing.Rectangle(startX, startY, endX - startX, endY - startY));
-                        }
-
-                        using (System.Drawing.Font font = new System.Drawing.Font("Arial", 12))
-                        using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
-                        {
-                            graphics.DrawString(maxTempStr, font, brush, new System.Drawing.PointF(10, 15));
-                            graphics.DrawString(minTempStr, font, brush, new System.Drawing.PointF(10, 35));
-                            graphics.DrawString(avgTempStr, font, brush, new System.Drawing.PointF(10, 55));
-                        }
-                    }
+                        value_max.Content = maxTempStr;
+                        value_avg.Content = avgTempStr;
+                        value_min.Content = minTempStr; 
+                    }); 
+                    
                     Cam_1.Source = BitmapSourceConvert.ToBitmapSource(bitmap);
                 }
                 else
@@ -181,9 +159,9 @@ namespace BosonCSharp_ex1
             double avgTemp = tempArray.Average();
 
             // 전시할 온도 값 
-            string maxTempStr = $"max_temp = {Math.Round(maxTemp, 2)}";
-            string minTempStr = $"min_temp = {Math.Round(minTemp, 2)}";
-            string avgTempStr = $"avg_temp = {Math.Round(avgTemp, 2)}";
+            string maxTempStr = $"{Math.Round(maxTemp, 1)}";
+            string minTempStr = $"{Math.Round(minTemp, 1)}";
+            string avgTempStr = $"{Math.Round(avgTemp, 1)}";
 
             return (maxTempStr, minTempStr, avgTempStr, minTemp, maxTemp, tempArray);
         }
@@ -249,6 +227,25 @@ namespace BosonCSharp_ex1
             Marshal.Copy(colorData, 0, colorMat.Data, colorData.Length);
 
             return colorMat;
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                is_initCam = InitCamera();
+                is_initTimer = InitTimer(10);
+
+                if (is_initTimer && is_initCam)
+                {
+                    timer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Connect_Click : " + ex);
+            }
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
